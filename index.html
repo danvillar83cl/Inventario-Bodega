@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Control de Inventario Bodega</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="shell">
+    <header class="hero">
+      <div>
+        <p class="eyebrow">Bodega</p>
+        <h1>Control de inventario</h1>
+        <p class="lead">
+          Registro de herramientas e insumos, ingresos, egresos e historial con exportacion a Excel.
+        </p>
+      </div>
+      <div class="hero-actions">
+        <button id="exportExcelBtn" class="btn btn-primary">Descargar Excel</button>
+        <button id="resetBtn" class="btn btn-secondary">Restablecer base</button>
+      </div>
+    </header>
+
+    <section class="stats-grid">
+      <article class="stat-card">
+        <span class="stat-label">Items registrados</span>
+        <strong id="statItems">0</strong>
+      </article>
+      <article class="stat-card">
+        <span class="stat-label">Unidades en stock</span>
+        <strong id="statStock">0</strong>
+      </article>
+      <article class="stat-card">
+        <span class="stat-label">Bajo stock</span>
+        <strong id="statLowStock">0</strong>
+      </article>
+      <article class="stat-card">
+        <span class="stat-label">Movimientos</span>
+        <strong id="statMovements">0</strong>
+      </article>
+    </section>
+
+    <main class="layout">
+      <section class="panel">
+        <div class="panel-header compact">
+          <div>
+            <p class="section-kicker">Movimiento</p>
+            <h2>Ingreso</h2>
+          </div>
+        </div>
+        <form id="incomeForm" class="form-grid">
+          <label>
+            <span>Tecnico o responsable</span>
+            <input name="technician" required>
+          </label>
+          <label>
+            <span>Item</span>
+            <select name="itemCode" required id="incomeItemSelect"></select>
+          </label>
+          <label>
+            <span>Fecha</span>
+            <input name="date" type="datetime-local" required>
+          </label>
+          <label>
+            <span>Cantidad</span>
+            <input name="quantity" type="number" min="1" step="1" required>
+          </label>
+          <button class="btn btn-primary" type="submit">Registrar ingreso</button>
+        </form>
+      </section>
+
+      <section class="panel">
+        <div class="panel-header compact">
+          <div>
+            <p class="section-kicker">Movimiento</p>
+            <h2>Egreso</h2>
+          </div>
+        </div>
+        <form id="outcomeForm" class="form-grid">
+          <label>
+            <span>Tecnico o responsable</span>
+            <input name="technician" required>
+          </label>
+          <label>
+            <span>Item</span>
+            <select name="itemCode" required id="outcomeItemSelect"></select>
+          </label>
+          <label>
+            <span>Fecha</span>
+            <input name="date" type="datetime-local" required>
+          </label>
+          <label>
+            <span>Cantidad</span>
+            <input name="quantity" type="number" min="1" step="1" required>
+          </label>
+          <button class="btn btn-danger" type="submit">Registrar egreso</button>
+        </form>
+      </section>
+
+      <section class="panel">
+        <div class="panel-header compact">
+          <div>
+            <p class="section-kicker">Registro</p>
+            <h2>Nuevo item</h2>
+          </div>
+        </div>
+        <form id="itemForm" class="form-grid">
+          <label>
+            <span>Codigo</span>
+            <input name="code" required>
+          </label>
+          <label>
+            <span>Descripcion</span>
+            <input name="description" required>
+          </label>
+          <label>
+            <span>Zona</span>
+            <input name="zone">
+          </label>
+          <label>
+            <span>Ubicacion</span>
+            <input name="location">
+          </label>
+          <label>
+            <span>Stock inicial</span>
+            <input name="stock" type="number" min="0" step="1" required>
+          </label>
+          <label>
+            <span>Stock minimo</span>
+            <input name="minStock" type="number" min="0" step="1" value="1">
+          </label>
+          <button class="btn btn-primary" type="submit">Guardar item</button>
+        </form>
+      </section>
+
+      <section class="panel panel-full">
+        <div class="panel-header">
+          <div>
+            <p class="section-kicker">Consulta</p>
+            <h2>Inventario e historial</h2>
+          </div>
+          <div class="tabs" role="tablist" aria-label="Pestanas de consulta">
+            <button id="inventoryTabBtn" class="tab-btn active" type="button" data-tab-target="inventoryTab">Inventario</button>
+            <button id="historyTabBtn" class="tab-btn" type="button" data-tab-target="historyTab">Historial</button>
+          </div>
+        </div>
+
+        <section id="inventoryTab" class="tab-panel active" role="tabpanel">
+          <div class="toolbar toolbar-spaced">
+            <input id="searchInput" type="search" placeholder="Buscar por codigo, descripcion, zona o ubicacion">
+            <label class="toggle">
+              <input id="lowStockOnly" type="checkbox">
+              <span>Solo bajo stock</span>
+            </label>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Codigo</th>
+                  <th>Descripcion</th>
+                  <th>Zona</th>
+                  <th>Ubicacion</th>
+                  <th>Stock</th>
+                  <th>Minimo</th>
+                </tr>
+              </thead>
+              <tbody id="inventoryTableBody"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section id="historyTab" class="tab-panel" role="tabpanel" hidden>
+          <div class="table-wrap history-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Fecha</th>
+                  <th>Tipo</th>
+                  <th>Tecnico</th>
+                  <th>Herramienta / Insumo</th>
+                  <th>Codigo</th>
+                  <th>Cantidad</th>
+                  <th>Stock resultante</th>
+                </tr>
+              </thead>
+              <tbody id="historyTableBody"></tbody>
+            </table>
+          </div>
+        </section>
+      </section>
+    </main>
+  </div>
+
+  <script src="seed-data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
